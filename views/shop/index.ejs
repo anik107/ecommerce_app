@@ -1,0 +1,116 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/home.css">
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+
+    <main>
+        <div class="home-container">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Welcome to Our Store</h1>
+                    <p class="hero-subtitle">
+                        Discover amazing products with unbeatable quality and prices.
+                        Your satisfaction is our top priority!
+                    </p>
+                    <a href="/products" class="hero-cta">
+                        🛍️ Shop Now
+                    </a>
+                </div>
+            </section>
+
+            <% if (prods.length > 0) { %>
+                <!-- Featured Products Section -->
+                <section class="featured-section">
+                    <header class="section-header">
+                        <h2 class="section-title">Featured Products</h2>
+                        <p class="section-subtitle">Hand-picked items just for you</p>
+                    </header>
+
+                    <div class="featured-products-grid">
+                        <% for (let product of prods.slice(0, 6)) { %>
+                            <article class="featured-product-card">
+                                <div class="featured-image-container">
+                                    <% if (product.imageUrl) { %>
+                                        <img src="<%= product.imageUrl %>"
+                                             alt="<%= product.title %>"
+                                             class="featured-product-image"
+                                             loading="lazy"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div class="product-image-fallback" style="display: none;">
+                                            <span>📷 No Image</span>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="product-image-fallback">
+                                            <span>📷 No Image</span>
+                                        </div>
+                                    <% } %>
+                                    <div class="featured-badge">Featured</div>
+                                </div>
+
+                                <div class="featured-product-info">
+                                    <h3 class="featured-product-title"><%= product.title %></h3>
+
+                                    <p class="featured-product-description">
+                                        <%= product.description || 'Premium quality product with excellent craftsmanship and attention to detail.' %>
+                                    </p>
+
+                                    <div class="featured-product-meta">
+                                        <div class="featured-product-price">
+                                            $<%= product.price %>
+                                        </div>
+                                        <div class="featured-rating">
+                                            <div class="featured-stars">★★★★★</div>
+                                            <span class="featured-rating-text">(5.0)</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="featured-product-actions">
+                                         <% if (isAuthenticated) { %>
+                                            <form action="/cart" method="POST" style="flex: 2;">
+                                                <button type="submit" class="btn-featured-cart">
+                                                    🛒 Add to Cart
+                                                </button>
+                                                <input type="hidden" name="productId" value="<%= product.id %>">
+                                            </form>
+                                        <% } %>
+                                        <a href="/products/<%= product.id %>" class="btn-featured-details">
+                                            👁️ View
+                                        </a>
+                                    </div>
+                                </div>
+                            </article>
+                        <% } %>
+                    </div>
+
+                    <!-- View All Products Section -->
+                    <div class="view-all-section">
+                        <h3 class="view-all-title">Discover More Amazing Products</h3>
+                        <p class="view-all-text">
+                            Browse our complete collection of premium products
+                        </p>
+                        <a href="/products" class="btn-view-all">
+                            🔍 View All Products
+                        </a>
+                    </div>
+                </section>
+            <% } else { %>
+                <!-- Empty State -->
+                <div class="empty-home-state">
+                    <div class="empty-home-icon">🏪</div>
+                    <h1 class="empty-home-title">Store Coming Soon!</h1>
+                    <p class="empty-home-text">
+                        We're currently setting up our amazing product collection.
+                        Check back soon for incredible deals and premium quality items!
+                    </p>
+                    <a href="/" class="btn-view-all">
+                        🔔 Notify Me When Ready
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    </main>
+<%- include('../includes/end.ejs') %>

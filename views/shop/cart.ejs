@@ -1,0 +1,85 @@
+<%- include('../includes/head.ejs') %>
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+    <main>
+        <div class="cart-container">
+            <% if (products.length > 0) { %>
+                <h1>Shopping Cart</h1>
+
+                <div class="cart-items">
+                    <% products.forEach(p => { %>
+                        <div class="cart-item-card">
+                            <div class="product-image">
+                                <% if (p.imageUrl) { %>
+                                    <img src="<%= p.imageUrl %>" alt="<%= p.title %>">
+                                <% } else { %>
+                                    <div class="no-image">No Image</div>
+                                <% } %>
+                            </div>
+
+                            <div class="product-details">
+                                <h3 class="product-title"><%= p.title %></h3>
+                                <% if (p.description) { %>
+                                    <p class="product-description"><%= p.description %></p>
+                                <% } %>
+                                <div class="product-info">
+                                    <span class="product-price">$<%= p.price %></span>
+                                    <span class="product-quantity">Qty: <%= p.cartItem.quantity %></span>
+                                    <span class="item-total">Total: $<%= (p.price * p.cartItem.quantity).toFixed(2) %></span>
+                                </div>
+                            </div>
+
+                            <div class="product-actions">
+                                <div class="quantity-controls">
+                                    <form action="/cart-decrease-item" method="POST" style="display: inline;">
+                                        <input type="hidden" name="productId" value="<%= p.id %>">
+                                        <button type="submit" class="btn btn-qty">-</button>
+                                    </form>
+                                    <span class="qty-display"><%= p.cartItem.quantity %></span>
+                                    <form action="/cart-increase-item" method="POST" style="display: inline;">
+                                        <input type="hidden" name="productId" value="<%= p.id %>">
+                                        <button type="submit" class="btn btn-qty">+</button>
+                                    </form>
+                                </div>
+                                <form action="/cart-delete-item" method="POST">
+                                    <input type="hidden" name="productId" value="<%= p.id %>">
+                                    <button type="submit" class="btn btn-remove">Remove</button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <div class="cart-summary">
+                    <div class="total-section">
+                        <h2>Order Summary</h2>
+                        <div class="total-items">
+                            <%= products.reduce((total, p) => total + p.cartItem.quantity, 0) %> items
+                        </div>
+                        <div class="total-price">
+                            Total: $<%= products.reduce((total, p) => total + (p.price * p.cartItem.quantity), 0).toFixed(2) %>
+                        </div>
+                    </div>
+
+                    <div class="cart-actions">
+                        <a href="/products" class="btn btn-secondary">Continue Shopping</a>
+                        <form action="/create-order" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-primary btn-checkout">Checkout</button>
+                        </form>
+                    </div>
+                </div>
+
+            <% } else { %>
+                <div class="empty-cart">
+                    <h1>Your Cart is Empty</h1>
+                    <p>Looks like you haven't added any items to your cart yet.</p>
+                    <div class="continue-shopping">
+                        <a href="/products" class="btn btn-primary">Start Shopping</a>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </main>
+<%- include('../includes/end.ejs') %>

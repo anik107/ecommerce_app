@@ -1,0 +1,124 @@
+<%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/orders.css">
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+
+    <main class="orders-container">
+        <%
+        // Helper function to safely get quantity
+        function getQuantity(product) {
+            return product.OrderItem?.quantity || product.orderItem?.quantity || 1;
+        }
+
+        // Helper function to safely get total price
+        function getTotalPrice(product) {
+            const quantity = getQuantity(product);
+            return (product.price * quantity).toFixed(2);
+        }
+        %>
+
+        <div class="page-header">
+            <h1 class="page-title">Your Orders</h1>
+            <p class="page-subtitle">Track your purchase history and order status</p>
+        </div>
+
+        <% if (orders && orders.length > 0) { %>
+            <div class="orders-list">
+                <% orders.forEach((order, index) => { %>
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <h3 class="order-number">Order #<%= order.id %></h3>
+                                <div class="order-meta">
+                                    <span class="order-date">
+                                        <i class="icon-calendar"></i>
+                                        <%= new Date(order.createdAt).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        }) %>
+                                    </span>
+                                    <span class="order-status status-delivered">
+                                        <i class="icon-check"></i>
+                                        Delivered
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="order-actions">
+                                <button class="btn btn-outline">View Details</button>
+                                <button class="btn btn-ghost">Reorder</button>
+                            </div>
+                        </div>
+
+                        <div class="order-items">
+                            <% if (order.products && order.products.length > 0) { %>
+                                <% order.products.forEach(product => { %>
+                                    <div class="order-item">
+                                        <div class="item-image">
+                                            <% if (product.imageUrl) { %>
+                                                <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
+                                            <% } else { %>
+                                                <div class="no-image">
+                                                    <i class="icon-image"></i>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        <div class="item-details">
+                                            <h4 class="item-title"><%= product.title %></h4>
+                                            <p class="item-description"><%= product.description %></p>
+                                            <div class="item-meta">
+                                                <span class="item-quantity">Qty: <%= getQuantity(product) %></span>
+                                                <span class="item-price">$<%= getTotalPrice(product) %></span>
+                                            </div>
+                                        </div>
+                                        <div class="item-actions">
+                                            <button class="btn btn-small btn-outline">Buy Again</button>
+                                            <button class="btn btn-small btn-ghost">Write Review</button>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            <% } %>
+                        </div>
+
+                        <div class="order-summary">
+                            <div class="summary-row">
+                                <span>Items (<%= order.products ? order.products.reduce((sum, p) => sum + getQuantity(p), 0) : 0 %>):</span>
+                                <span>$<%= order.products ? order.products.reduce((sum, p) => sum + parseFloat(getTotalPrice(p)), 0).toFixed(2) : '0.00' %></span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Shipping:</span>
+                                <span>Free</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span>Order Total:</span>
+                                <span>$<%= order.products ? order.products.reduce((sum, p) => sum + parseFloat(getTotalPrice(p)), 0).toFixed(2) : '0.00' %></span>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+
+            <div class="pagination">
+                <button class="btn btn-outline" disabled>Previous</button>
+                <span class="page-info">Page 1 of 1</span>
+                <button class="btn btn-outline" disabled>Next</button>
+            </div>
+
+        <% } else { %>
+            <div class="empty-orders">
+                <div class="empty-orders-icon">
+                    <i class="icon-package"></i>
+                </div>
+                <h2>No Orders Yet</h2>
+                <p>You haven't placed any orders yet. Start shopping to see your orders here!</p>
+                <a href="/products" class="btn btn-primary btn-large">
+                    <i class="icon-shopping"></i>
+                    Start Shopping
+                </a>
+            </div>
+        <% } %>
+    </main>
+
+<%- include('../includes/end.ejs') %>

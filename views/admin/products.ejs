@@ -1,0 +1,193 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/admin-products.css">
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+
+    <main>
+        <div class="admin-container">
+            <!-- Admin Header -->
+            <header class="admin-header">
+                <div class="admin-title-section">
+                    <div>
+                        <h1 class="admin-title">🛍️ Product Management</h1>
+                        <p class="admin-subtitle">Manage your product inventory and listings</p>
+                    </div>
+                    <% if (prods.length > 0) { %>
+                        <span class="products-count"><%= prods.length %> Products</span>
+                    <% } %>
+                </div>
+
+                <div class="admin-actions">
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="Search products..." id="productSearch">
+                    </div>
+                    <a href="/admin/add-product" class="btn-add-product">
+                        ➕ Add New Product
+                    </a>
+                </div>
+            </header>
+
+            <% if (prods.length > 0) { %>
+                <!-- Bulk Actions (initially hidden) -->
+                <div class="bulk-actions" id="bulkActions">
+                    <div class="bulk-info">
+                        <span id="selectedCount">0</span> products selected
+                    </div>
+                    <div class="bulk-buttons">
+                        <button class="btn-bulk btn-bulk-delete">🗑️ Delete Selected</button>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="admin-products-grid">
+                    <% for (let product of prods) { %>
+                        <article class="admin-product-card" data-product-title="<%= product.title.toLowerCase() %>">
+                            <!-- Product Status Badges -->
+                            <div class="admin-product-status">
+                                <span class="status-badge badge-active">Active</span>
+                                <% if (Math.random() > 0.7) { %>
+                                    <span class="status-badge badge-featured">Featured</span>
+                                <% } %>
+                            </div>
+
+                            <!-- Product Image -->
+                            <div class="admin-image-container">
+                                <% if (product.imageUrl) { %>
+                                    <img src="<%= product.imageUrl %>"
+                                         alt="<%= product.title %>"
+                                         class="admin-product-image"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="product-image-fallback" style="display: none;">
+                                        <span>📷 No Image</span>
+                                    </div>
+                                <% } else { %>
+                                    <div class="product-image-fallback">
+                                        <span>📷 No Image</span>
+                                    </div>
+                                <% } %>
+
+                                <!-- Image Overlay Actions -->
+                                <div class="admin-image-overlay"></div>
+                                <div class="image-actions">
+                                    <button class="btn-image-action">📷 Change</button>
+                                    <a href="/products/<%= product.id %>" class="btn-admin-view" target="_blank">👁️ View</a>
+                                </div>
+                            </div>
+
+                            <!-- Product Information -->
+                            <div class="admin-product-info">
+                                <h3 class="admin-product-title"><%= product.title %></h3>
+
+                                <div class="admin-product-meta">
+                                    <div class="admin-product-price">$<%= product.price %></div>
+                                    <div class="admin-product-id">ID: #<%= product.id %></div>
+                                </div>
+
+                                <p class="admin-product-description">
+                                    <%= product.description || 'No description available for this product.' %>
+                                </p>
+
+                                <!-- Product Statistics -->
+                                <div class="admin-product-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-value"><%= Math.floor(Math.random() * 150) + 10 %></span>
+                                        <span class="stat-label">Views</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value"><%= Math.floor(Math.random() * 50) + 5 %></span>
+                                        <span class="stat-label">Sold</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value"><%= Math.floor(Math.random() * 100) + 20 %></span>
+                                        <span class="stat-label">Stock</span>
+                                    </div>
+                                </div>
+
+                                <!-- Admin Actions -->
+                                <div class="admin-product-actions">
+                                    <a href="/admin/edit-product/<%= product.id %>?edit=true" class="btn-admin-edit">
+                                        ✏️ Edit
+                                    </a>
+                                    <form action="/admin/delete-product/<%= product.id %>" method="POST" style="flex: 1;" onsubmit="return confirmDelete('<%= product.title %>')">
+                                        <input type="hidden" name="productId" value="<%= product.id %>">
+                                        <button type="submit" class="btn-admin-delete">
+                                            🗑️ Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </article>
+                    <% } %>
+                </div>
+            <% } else { %>
+                <!-- Empty State -->
+                <div class="admin-empty-state">
+                    <div class="admin-empty-icon">📦</div>
+                    <h2 class="admin-empty-title">No Products Yet</h2>
+                    <p class="admin-empty-text">
+                        Start building your product catalog by adding your first product.
+                        You can add product details, images, pricing, and more!
+                    </p>
+                    <a href="/admin/add-product" class="btn-add-product">
+                        ➕ Add Your First Product
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    </main>
+
+    <script>
+        // Search functionality
+        document.getElementById('productSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const productCards = document.querySelectorAll('.admin-product-card');
+
+            productCards.forEach(card => {
+                const title = card.getAttribute('data-product-title');
+                if (title.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Delete confirmation
+        function confirmDelete(productTitle) {
+            return confirm(`Are you sure you want to delete "${productTitle}"? This action cannot be undone.`);
+        }
+
+        // Image hover effects
+        document.querySelectorAll('.admin-product-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.classList.add('hover');
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.classList.remove('hover');
+            });
+        });
+
+        // Add subtle animation on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.admin-product-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'all 0.5s ease';
+
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 50);
+                }, index * 100);
+            });
+        });
+    </script>
+
+<%- include('../includes/end.ejs') %>

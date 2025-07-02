@@ -1,0 +1,118 @@
+<header class="elegant-header">
+    <div class="nav-container">
+        <!-- Brand/Logo Section -->
+        <div class="brand">
+            <a href="/" class="brand-link">
+                <span class="brand-icon">🛍️</span>
+                <span class="brand-text">ShopElegant</span>
+            </a>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-toggle" onclick="toggleMobileMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <!-- Navigation Menu -->
+        <nav class="elegant-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a class="nav-link <%= path === '/' ? 'active' : '' %>" href="/">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Home</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <%= path === '/products' ? 'active' : '' %>" href="/products">
+                        <span class="nav-icon">📦</span>
+                        <span class="nav-text">Products</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <%= path === '/cart' ? 'active' : '' %>" href="/cart">
+                        <span class="nav-icon">🛒</span>
+                        <span class="nav-text">Cart</span>
+                        <span class="cart-badge">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <%= path === '/orders' ? 'active' : '' %>" href="/orders">
+                        <span class="nav-icon">📋</span>
+                        <span class="nav-text">Orders</span>
+                    </a>
+                </li>
+                                <li class="nav-item dropdown">
+                    <a class="nav-link <%= path.includes('/admin') ? 'active' : '' %>" href="#" onclick="toggleDropdown(event)">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Admin</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-link <%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">
+                                <span class="dropdown-icon">➕</span>
+                                Add Product
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-link <%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">
+                                <span class="dropdown-icon">📊</span>
+                                Manage Products
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <% if (isAuthenticated) { %>
+                <li class="nav-item">
+                    <form action="/logout" method="POST" style="display: inline;">
+                        <button type="submit" class="nav-link logout-btn" style="background: none; border: none; cursor: pointer; color: inherit; font: inherit;">
+                            <span class="nav-icon">🚪</span>
+                            <span class="nav-text">Logout</span>
+                        </button>
+                    </form>
+                </li>
+                <% } else { %>
+                <li class="nav-item">
+                    <a class="nav-link <%= path === '/login' ? 'active' : '' %>" href="/login">
+                        <span class="nav-icon">🔑</span>
+                        <span class="nav-text">Login</span>
+                    </a>
+                </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<script>
+function toggleMobileMenu() {
+    const nav = document.querySelector('.elegant-nav');
+    const toggle = document.querySelector('.mobile-toggle');
+    nav.classList.toggle('mobile-open');
+    toggle.classList.toggle('open');
+}
+
+function toggleDropdown(event) {
+    event.preventDefault();
+    const dropdown = event.currentTarget.parentElement;
+    dropdown.classList.toggle('open');
+
+    // Close other dropdowns
+    document.querySelectorAll('.dropdown.open').forEach(item => {
+        if (item !== dropdown) {
+            item.classList.remove('open');
+        }
+    });
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown.open').forEach(item => {
+            item.classList.remove('open');
+        });
+    }
+});
+</script>

@@ -1,0 +1,439 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/admin-form.css">
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+
+    <main>
+        <div class="admin-form-container">
+            <!-- Form Header -->
+            <header class="admin-form-header">
+                <h1 class="admin-form-title">
+                    <% if (editing) { %>
+                        ✏️ Edit Product
+                    <% } else { %>
+                        ➕ Add New Product
+                    <% } %>
+                </h1>
+                <p class="admin-form-subtitle">
+                    <% if (editing) { %>
+                        Update product details and manage your inventory
+                    <% } else { %>
+                        Create a new product for your store
+                    <% } %>
+                </p>
+            </header>
+
+            <!-- Breadcrumb Navigation -->
+            <nav class="form-breadcrumb">
+                <ul class="breadcrumb-list">
+                    <li class="breadcrumb-item">
+                        <a href="/admin/products" class="breadcrumb-link">Products</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <span class="breadcrumb-separator">›</span>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <% if (editing) { %>
+                            Edit Product
+                        <% } else { %>
+                            Add Product
+                        <% } %>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Progress Bar -->
+            <div class="form-progress">
+                <div class="progress-bar" id="formProgress"></div>
+            </div>
+
+            <!-- Main Form -->
+            <form class="enhanced-product-form" action="<% if (editing) { %>/admin/edit-product<% } else { %>/admin/add-product<% } %>" method="POST" id="productForm">
+                <div class="form-sections">
+                    <!-- Main Content Section -->
+                    <div class="form-main-content">
+                        <!-- Basic Information Section -->
+                        <section class="form-section">
+                            <h2 class="section-title">
+                                <span class="section-icon">📝</span>
+                                Basic Information
+                            </h2>
+
+                            <div class="enhanced-form-control">
+                                <label for="title" class="enhanced-label label-required">Product Title</label>
+                                <input type="text"
+                                       name="title"
+                                       id="title"
+                                       class="enhanced-input"
+                                       value="<% if (editing && product) { %><%= product.title %><% } %>"
+                                       placeholder="Enter a descriptive product title"
+                                       required>
+                                <div class="input-help">Choose a clear, descriptive title that customers will easily understand</div>
+                            </div>
+
+                            <div class="input-group">
+                                <div class="enhanced-form-control">
+                                    <label for="price" class="enhanced-label label-required">Price ($)</label>
+                                    <input type="number"
+                                           name="price"
+                                           id="price"
+                                           class="enhanced-input"
+                                           step="0.01"
+                                           min="0"
+                                           value="<% if (editing && product) { %><%= product.price %><% } %>"
+                                           placeholder="0.00"
+                                           required>
+                                </div>
+                                <div class="enhanced-form-control">
+                                    <label for="category" class="enhanced-label">Category</label>
+                                    <select name="category" id="category" class="enhanced-select">
+                                        <option value="">Select a category</option>
+                                        <option value="electronics">Electronics</option>
+                                        <option value="clothing">Clothing</option>
+                                        <option value="home">Home & Garden</option>
+                                        <option value="sports">Sports</option>
+                                        <option value="books">Books</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="enhanced-form-control">
+                                <label for="description" class="enhanced-label">Description</label>
+                                <textarea name="description"
+                                          id="description"
+                                          class="enhanced-textarea"
+                                          placeholder="Describe your product in detail..."
+                                          rows="5"><% if (editing && product) { %><%= product.description %><% } %></textarea>
+                                <div class="input-help">
+                                    <span>Provide a detailed description to help customers understand your product</span>
+                                    <span class="character-count" id="descriptionCount">0/500</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Image Section -->
+                        <section class="form-section">
+                            <h2 class="section-title">
+                                <span class="section-icon">🖼️</span>
+                                Product Images
+                            </h2>
+
+                            <div class="enhanced-form-control">
+                                <label for="imageUrl" class="enhanced-label">Image URL</label>
+                                <input type="url"
+                                       name="imageUrl"
+                                       id="imageUrl"
+                                       class="enhanced-input"
+                                       value="<% if (editing && product) { %><%= product.imageUrl %><% } %>"
+                                       placeholder="https://example.com/product-image.jpg">
+                                <div class="input-help">Provide a direct link to your product image (JPG, PNG, or WebP)</div>
+                            </div>
+
+                            <div class="image-preview-section">
+                                <div class="image-preview-container" id="imagePreviewContainer">
+                                    <% if (editing && product && product.imageUrl) { %>
+                                        <img src="<%= product.imageUrl %>" alt="Product preview" class="image-preview" id="imagePreview">
+                                    <% } else { %>
+                                        <div class="image-placeholder" id="imagePlaceholder">
+                                            <span class="image-placeholder-icon">📷</span>
+                                            <div>Image preview will appear here</div>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                <div class="image-actions">
+                                    <button type="button" class="btn-image-upload" onclick="loadImagePreview()">
+                                        🔄 Load Preview
+                                    </button>
+                                    <button type="button" class="btn-image-remove" onclick="clearImagePreview()" id="removeImageBtn">
+                                        🗑️ Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- SEO Section -->
+                        <section class="form-section">
+                            <div class="seo-section">
+                                <h3 class="seo-title">
+                                    🔍 SEO Optimization
+                                </h3>
+                                <div class="enhanced-form-control">
+                                    <label for="metaTitle" class="enhanced-label">Meta Title</label>
+                                    <input type="text"
+                                           name="metaTitle"
+                                           id="metaTitle"
+                                           class="enhanced-input"
+                                           placeholder="SEO-friendly title for search engines">
+                                    <div class="input-help">
+                                        <span>Optimize for search engines (recommended: 50-60 characters)</span>
+                                        <span class="character-count" id="metaTitleCount">0/60</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- Sidebar Section -->
+                    <div class="form-sidebar">
+                        <!-- Publishing Options -->
+                        <section class="sidebar-section">
+                            <h3 class="sidebar-title">📊 Publishing</h3>
+                            <div class="status-options">
+                                <label class="status-option">
+                                    <input type="radio" name="status" value="active" checked>
+                                    <div>
+                                        <strong>Active</strong>
+                                        <div style="font-size: 0.9rem; color: #666;">Visible to customers</div>
+                                    </div>
+                                </label>
+                                <label class="status-option">
+                                    <input type="radio" name="status" value="draft">
+                                    <div>
+                                        <strong>Draft</strong>
+                                        <div style="font-size: 0.9rem; color: #666;">Save for later</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </section>
+
+                        <!-- Product Features -->
+                        <section class="sidebar-section">
+                            <h3 class="sidebar-title">⭐ Features</h3>
+                            <div class="status-options">
+                                <label class="status-option">
+                                    <input type="checkbox" name="featured" value="true">
+                                    <div>
+                                        <strong>Featured Product</strong>
+                                        <div style="font-size: 0.9rem; color: #666;">Show on homepage</div>
+                                    </div>
+                                </label>
+                                <label class="status-option">
+                                    <input type="checkbox" name="onSale" value="true">
+                                    <div>
+                                        <strong>On Sale</strong>
+                                        <div style="font-size: 0.9rem; color: #666;">Mark as discounted</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </section>
+
+                        <!-- Inventory -->
+                        <section class="sidebar-section">
+                            <h3 class="sidebar-title">📦 Inventory</h3>
+                            <div class="enhanced-form-control">
+                                <label for="stock" class="enhanced-label">Stock Quantity</label>
+                                <input type="number"
+                                       name="stock"
+                                       id="stock"
+                                       class="enhanced-input"
+                                       min="0"
+                                       value="0"
+                                       placeholder="0">
+                            </div>
+                            <div class="enhanced-form-control">
+                                <label for="sku" class="enhanced-label">SKU</label>
+                                <input type="text"
+                                       name="sku"
+                                       id="sku"
+                                       class="enhanced-input"
+                                       placeholder="PROD-001">
+                            </div>
+                        </section>
+
+                        <!-- Quick Tags -->
+                        <section class="sidebar-section">
+                            <h3 class="sidebar-title">🏷️ Quick Tags</h3>
+                            <div class="category-tags">
+                                <span class="category-tag">New Arrival</span>
+                                <span class="category-tag">Best Seller</span>
+                                <span class="category-tag">Limited</span>
+                                <span class="category-tag">Premium</span>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- Hidden Fields -->
+                <% if (editing) { %>
+                    <input type="hidden" name="productId" value="<%= product.id %>">
+                <% } %>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <div class="action-group">
+                        <a href="/admin/products" class="btn-form-action btn-outline">
+                            ← Cancel
+                        </a>
+                        <% if (editing) { %>
+                            <button type="button" class="btn-form-action btn-danger" onclick="confirmDelete()">
+                                🗑️ Delete Product
+                            </button>
+                        <% } %>
+                    </div>
+
+                    <div class="save-options">
+                        <button type="button" class="btn-form-action btn-secondary" onclick="saveDraft()">
+                            💾 Save Draft
+                        </button>
+                        <button type="submit" class="btn-form-action btn-primary">
+                            <% if (editing) { %>
+                                ✅ Update Product
+                            <% } else { %>
+                                ➕ Create Product
+                            <% } %>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        // Form Progress Tracking
+        function updateProgress() {
+            const form = document.getElementById('productForm');
+            const inputs = form.querySelectorAll('input[required], textarea[required]');
+            let filledInputs = 0;
+
+            inputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    filledInputs++;
+                }
+            });
+
+            const progress = (filledInputs / inputs.length) * 100;
+            document.getElementById('formProgress').style.width = progress + '%';
+        }
+
+        // Image Preview Functionality
+        function loadImagePreview() {
+            const imageUrl = document.getElementById('imageUrl').value;
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const placeholder = document.getElementById('imagePlaceholder');
+
+            if (imageUrl) {
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = 'Product preview';
+                img.className = 'image-preview';
+                img.id = 'imagePreview';
+
+                img.onload = function() {
+                    previewContainer.innerHTML = '';
+                    previewContainer.appendChild(img);
+                    document.getElementById('removeImageBtn').style.display = 'inline-block';
+                };
+
+                img.onerror = function() {
+                    alert('Failed to load image. Please check the URL.');
+                };
+            }
+        }
+
+        function clearImagePreview() {
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            previewContainer.innerHTML = `
+                <div class="image-placeholder" id="imagePlaceholder">
+                    <span class="image-placeholder-icon">📷</span>
+                    <div>Image preview will appear here</div>
+                </div>
+            `;
+            document.getElementById('imageUrl').value = '';
+            document.getElementById('removeImageBtn').style.display = 'none';
+        }
+
+        // Character Counting
+        function updateCharacterCount(inputId, countId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(countId);
+
+            if (input && counter) {
+                const length = input.value.length;
+                counter.textContent = `${length}/${maxLength}`;
+
+                if (length > maxLength * 0.9) {
+                    counter.className = 'character-count warning';
+                }
+                if (length > maxLength) {
+                    counter.className = 'character-count error';
+                }
+                if (length <= maxLength * 0.9) {
+                    counter.className = 'character-count';
+                }
+            }
+        }
+
+        // Status Option Selection
+        document.querySelectorAll('.status-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const radio = this.querySelector('input[type="radio"]');
+                if (radio) {
+                    document.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                }
+            });
+        });
+
+        // Category Tag Selection
+        document.querySelectorAll('.category-tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                this.classList.toggle('selected');
+            });
+        });
+
+        // Form Functions
+        function saveDraft() {
+            const form = document.getElementById('productForm');
+            const statusInput = form.querySelector('input[name="status"][value="draft"]');
+            statusInput.checked = true;
+            form.submit();
+        }
+
+        function confirmDelete() {
+            if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+                // Add delete functionality here
+                window.location.href = '/admin/products';
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial visibility of remove button
+            const imageUrl = document.getElementById('imageUrl').value;
+            const removeBtn = document.getElementById('removeImageBtn');
+            removeBtn.style.display = imageUrl ? 'inline-block' : 'none';
+
+            // Update progress on input
+            document.querySelectorAll('input, textarea, select').forEach(input => {
+                input.addEventListener('input', updateProgress);
+            });
+
+            // Character counting
+            const descriptionInput = document.getElementById('description');
+            const metaTitleInput = document.getElementById('metaTitle');
+
+            if (descriptionInput) {
+                descriptionInput.addEventListener('input', () => updateCharacterCount('description', 'descriptionCount', 500));
+                updateCharacterCount('description', 'descriptionCount', 500);
+            }
+
+            if (metaTitleInput) {
+                metaTitleInput.addEventListener('input', () => updateCharacterCount('metaTitle', 'metaTitleCount', 60));
+            }
+
+            // Auto-load image preview if URL exists
+            if (imageUrl) {
+                loadImagePreview();
+            }
+
+            // Initial progress update
+            updateProgress();
+        });
+    </script>
+
+<%- include('../includes/end.ejs') %>

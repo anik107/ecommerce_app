@@ -1,0 +1,81 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/product-list.css">
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+
+    <main>
+        <div class="products-container">
+            <header class="products-header">
+                <h1>Our Products</h1>
+                <p class="products-subtitle">Discover our amazing collection of products</p>
+            </header>
+
+            <% if (prods.length > 0) { %>
+                <div class="products-grid">
+                    <% for (let product of prods) { %>
+                        <article class="product-card">
+                            <div class="product-image-container">
+                                <% if (product.imageUrl) { %>
+                                    <img src="<%= product.imageUrl %>"
+                                         alt="<%= product.title %>"
+                                         class="product-image"
+                                         loading="lazy"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="product-image-fallback" style="display: none;">
+                                        <span>📷 No Image</span>
+                                    </div>
+                                <% } else { %>
+                                    <div class="product-image-fallback">
+                                        <span>📷 No Image</span>
+                                    </div>
+                                <% } %>
+                                <div class="product-badge">New</div>
+                            </div>
+
+                            <div class="product-info">
+                                <h2 class="product-title"><%= product.title %></h2>
+
+                                <div class="product-rating">
+                                    <div class="stars">★★★★☆</div>
+                                    <span class="rating-text">(4.2) • 127 reviews</span>
+                                </div>
+
+                                <p class="product-description">
+                                    <%= product.description || 'Discover this amazing product with excellent quality and great value for money.' %>
+                                </p>
+
+                                <div class="product-price-container">
+                                    <div class="product-price">
+                                        $<%= product.price %>
+                                        <span class="price-original">$<%= (parseFloat(product.price) * 1.2).toFixed(2) %></span>
+                                    </div>
+                                </div>
+
+                                <div class="product-actions">
+                                    <a href="/products/<%= product.id %>" class="btn-details">
+                                        👁️ Details
+                                    </a>
+                                    <% if (isAuthenticated) { %>
+                                        <%- include('../shop/add-to-cart.ejs', { product: product }) %>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </article>
+                    <% } %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-icon">🛍️</div>
+                    <h1>No Products Found!</h1>
+                    <p>We're currently updating our inventory. Please check back soon for amazing products!</p>
+                    <a href="/" class="btn-details" style="display: inline-flex; width: auto;">
+                        🏠 Go to Home
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    </main>
+<%- include('../includes/end.ejs') %>
