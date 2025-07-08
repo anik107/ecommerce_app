@@ -43,7 +43,10 @@ const sendErrorDev = (err, req, res) => {
   logger.error('ERROR 💥', err);
   return res.status(err.statusCode).render('error', {
     title: 'Something went wrong!',
-    msg: err.message
+    msg: err.message,
+    pageTitle: 'Error',
+    path: '/error',
+    isAuthenticated: req.session.isLoggedIn
   });
 };
 
@@ -72,7 +75,10 @@ const sendErrorProd = (err, req, res) => {
   if (err.isOperational) {
     return res.status(err.statusCode).render('error', {
       title: 'Something went wrong!',
-      msg: err.message
+      msg: err.message,
+      pageTitle: 'Error',
+      path: '/error',
+      isAuthenticated: req.session.isLoggedIn
     });
   }
   // B) Programming or other unknown error: don't leak error details
@@ -81,7 +87,10 @@ const sendErrorProd = (err, req, res) => {
   // 2) Send generic message
   return res.status(err.statusCode).render('error', {
     title: 'Something went wrong!',
-    msg: 'Please try again later.'
+    msg: 'Please try again later.',
+    pageTitle: 'Error',
+    path: '/error',
+    isAuthenticated: req.session.isLoggedIn
   });
 };
 

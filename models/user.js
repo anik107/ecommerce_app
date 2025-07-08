@@ -9,7 +9,11 @@ const User = sequelize.define('user', {
         primaryKey: true
     },
     name: Sequelize.STRING,
-    email: Sequelize.STRING
+    email: Sequelize.STRING,
+    password: {
+        type: Sequelize.STRING,
+        allowNull: true // Allow null initially for existing records
+    },
 });
 
 module.exports = User;

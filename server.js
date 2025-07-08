@@ -17,9 +17,28 @@ const startServer = async () => {
   try {
     // Sync database
     if (appConfig.app.env === 'development') {
-      await sequelize.sync(); // Don't force in production
+      // For development, check if we need to add password column
+      try {
+        const [results] = await sequelize.query(`
+          SELECT column_name
+          FROM information_schema.columns
+          WHERE table_name = 'users' AND column_name = 'password';
+        `);
+
+        if (results.length === 0) {
+          logger.info('Password column not found, adding it...');
+          await sequelize.query(`
+            ALTER TABLE users ADD COLUMN password VARCHAR(255) NULL;
+          `);
+          logger.info('Password column added successfully');
+        }
+      } catch (error) {
+        logger.warn('Could not check/add password column:', error.message);
+      }
+
+      await sequelize.sync({ alter: false }); // Use alter: false for safety
     } else {
-      await sequelize.sync({ alter: true }); // Use alter for production
+      await sequelize.sync();
     }
 
     logger.info('Database synchronized successfully');
@@ -38,7 +57,8 @@ const startServer = async () => {
       if (!user) {
         user = await User.create({
           name: 'Development User',
-          email: 'dev@example.com'
+          email: 'dev@example.com',
+          password: 'dev-password' // Add a default password
         });
         await user.createCart();
         logger.info('Default development user created');

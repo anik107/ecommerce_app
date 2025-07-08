@@ -60,9 +60,42 @@ const validateUser = [
   handleValidationErrors
 ];
 
+const validateSignup = [
+  body('fullName')
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Full name must be between 2 and 100 characters'),
+
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid email'),
+
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number'),
+
+  body('confirmPassword')
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error('Passwords do not match');
+      }
+      return true;
+    }),
+
+  body('terms')
+    .equals('on')
+    .withMessage('You must accept the Terms of Service and Privacy Policy'),
+
+  handleValidationErrors
+];
+
 module.exports = {
   validateProduct,
   validateLogin,
   validateUser,
+  validateSignup,
   handleValidationErrors
 };

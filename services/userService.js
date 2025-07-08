@@ -6,7 +6,7 @@ const logger = require('../config/logger');
 class UserService {
   static async createUser(userData) {
     try {
-      const { name, email } = userData;
+      const { name, email, password } = userData;
 
       // Check if user already exists
       const existingUser = await User.findOne({ where: { email } });
@@ -14,7 +14,7 @@ class UserService {
         throw new AppError('User with this email already exists', 400);
       }
 
-      const user = await User.create({ name, email });
+      const user = await User.create({ name, email, password });
 
       // Create cart for new user
       await user.createCart();
