@@ -125,9 +125,9 @@
                             <label class="quantity-label">Quantity:</label>
                             <div class="quantity-controls">
                                 <div class="quantity-input-container">
-                                    <button type="button" class="quantity-btn" onclick="decreaseQuantity()">−</button>
+                                    <button type="button" class="quantity-btn" data-action="decrease">−</button>
                                     <input type="number" class="quantity-input" id="quantity" value="1" min="1" max="99">
-                                    <button type="button" class="quantity-btn" onclick="increaseQuantity()">+</button>
+                                    <button type="button" class="quantity-btn" data-action="increase">+</button>
                                 </div>
                                 <span class="stock-info">✓ In stock (47 available)</span>
                             </div>
@@ -184,44 +184,6 @@
             </div>
         </div>
     </main>
-
-    <script>
-        function increaseQuantity() {
-            const input = document.getElementById('quantity');
-            const cartInput = document.getElementById('cart-quantity');
-            let value = parseInt(input.value) || 1;
-            if (value < 99) {
-                value++;
-                input.value = value;
-                cartInput.value = value;
-            }
-        }
-
-        function decreaseQuantity() {
-            const input = document.getElementById('quantity');
-            const cartInput = document.getElementById('cart-quantity');
-            let value = parseInt(input.value) || 1;
-            if (value > 1) {
-                value--;
-                input.value = value;
-                cartInput.value = value;
-            }
-        }
-
-        // Update cart quantity when input changes
-        document.getElementById('quantity').addEventListener('input', function() {
-            const value = parseInt(this.value) || 1;
-            // Ensure value is within valid range
-            if (value < 1) {
-                this.value = 1;
-                document.getElementById('cart-quantity').value = 1;
-            } else if (value > 99) {
-                this.value = 99;
-                document.getElementById('cart-quantity').value = 99;
-            } else {
-                document.getElementById('cart-quantity').value = value;
-            }
-        });
-    </script>
+    <script src="/js/product-detail.js"></script>
 
 <%- include('../includes/end.ejs') %>

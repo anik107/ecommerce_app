@@ -1,0 +1,482 @@
+<%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/checkout.css">
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+
+    <main class="checkout-container">
+        <%
+        // Helper function to calculate total price
+        function calculateTotal(products) {
+            return products.reduce((total, p) => total + (p.price * p.cartItem.quantity), 0).toFixed(2);
+        }
+
+        // Helper function to calculate total items
+        function calculateTotalItems(products) {
+            return products.reduce((total, p) => total + p.cartItem.quantity, 0);
+        }
+        %>
+
+        <!-- Checkout Header -->
+        <div class="checkout-header">
+            <h1 class="checkout-title">Checkout</h1>
+            <p class="checkout-subtitle">Review your order and complete your purchase</p>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="checkout-progress">
+            <div class="progress-step">
+                <div class="step-circle completed">1</div>
+                <span class="step-label">Cart</span>
+            </div>
+            <div class="step-connector completed"></div>
+            <div class="progress-step">
+                <div class="step-circle active">2</div>
+                <span class="step-label">Checkout</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="progress-step">
+                <div class="step-circle upcoming">3</div>
+                <span class="step-label">Confirmation</span>
+            </div>
+        </div>
+
+        <div class="checkout-content">
+            <!-- Checkout Form -->
+            <div class="checkout-form">
+                <form action="/place-order" method="POST" id="checkout-form">
+                    <!-- Shipping Information -->
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Shipping Address
+                        </h2>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName" class="form-label">First Name *</label>
+                                <input type="text" id="firstName" name="firstName" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName" class="form-label">Last Name *</label>
+                                <input type="text" id="lastName" name="lastName" class="form-input" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address *</label>
+                            <input type="email" id="email" name="email" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address" class="form-label">Street Address *</label>
+                            <input type="text" id="address" name="address" class="form-input" placeholder="House number and street name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="apartment" class="form-label">Apartment, suite, etc. (optional)</label>
+                            <input type="text" id="apartment" name="apartment" class="form-input">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="city" class="form-label">City *</label>
+                                <input type="text" id="city" name="city" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="state" class="form-label">State/Province *</label>
+                                <select id="state" name="state" class="form-select" required>
+                                    <option value="">Select State</option>
+                                    <option value="AL">Alabama</option>
+                                    <option value="CA">California</option>
+                                    <option value="FL">Florida</option>
+                                    <option value="NY">New York</option>
+                                    <option value="TX">Texas</option>
+                                    <!-- Add more states as needed -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="zipCode" class="form-label">ZIP/Postal Code *</label>
+                                <input type="text" id="zipCode" name="zipCode" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="country" class="form-label">Country *</label>
+                                <select id="country" name="country" class="form-select" required>
+                                    <option value="">Select Country</option>
+                                    <option value="US" selected>United States</option>
+                                    <option value="CA">Canada</option>
+                                    <option value="UK">United Kingdom</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Billing Information -->
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                            </svg>
+                            Billing Information
+                        </h2>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="sameAsShipping" name="sameAsShipping" class="checkbox-input" checked>
+                            <label for="sameAsShipping" class="checkbox-label">
+                                Billing address is the same as shipping address
+                            </label>
+                        </div>
+
+                        <div id="billingAddress" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="billingFirstName" class="form-label">First Name *</label>
+                                    <input type="text" id="billingFirstName" name="billingFirstName" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="billingLastName" class="form-label">Last Name *</label>
+                                    <input type="text" id="billingLastName" name="billingLastName" class="form-input">
+                                </div>
+                            </div>
+                            <!-- Additional billing fields can be added here -->
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            Payment Method
+                        </h2>
+
+                        <div class="payment-methods">
+                            <div class="payment-option selected">
+                                <input type="radio" name="paymentMethod" value="credit_card" class="payment-radio" checked>
+                                <div class="payment-info">
+                                    <div class="payment-name">Credit/Debit Card</div>
+                                    <div class="payment-description">Pay securely with your credit or debit card</div>
+                                </div>
+                                <svg class="payment-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                </svg>
+                            </div>
+
+                            <div class="payment-option">
+                                <input type="radio" name="paymentMethod" value="paypal" class="payment-radio">
+                                <div class="payment-info">
+                                    <div class="payment-name">PayPal</div>
+                                    <div class="payment-description">Pay with your PayPal account</div>
+                                </div>
+                                <svg class="payment-icon" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.26-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.75.75 0 0 0-.741.638l-1.338 8.477a.641.641 0 0 0 .633.74h4.25a.75.75 0 0 0 .741-.638l.42-2.654a.641.641 0 0 1 .633-.54h1.705c3.765 0 6.709-1.528 7.56-5.946.359-1.873.18-3.434-.587-4.537z"/>
+                                </svg>
+                            </div>
+
+                            <div class="payment-option">
+                                <input type="radio" name="paymentMethod" value="cash_on_delivery" class="payment-radio">
+                                <div class="payment-info">
+                                    <div class="payment-name">Cash on Delivery</div>
+                                    <div class="payment-description">Pay when your order is delivered</div>
+                                </div>
+                                <svg class="payment-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Credit Card Fields (shown when credit card is selected) -->
+                        <div id="creditCardFields">
+                            <div class="form-group">
+                                <label for="cardNumber" class="form-label">Card Number *</label>
+                                <input type="text" id="cardNumber" name="cardNumber" class="form-input" placeholder="1234 5678 9012 3456">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="expiryDate" class="form-label">Expiry Date *</label>
+                                    <input type="text" id="expiryDate" name="expiryDate" class="form-input" placeholder="MM/YY">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cvv" class="form-label">CVV *</label>
+                                    <input type="text" id="cvv" name="cvv" class="form-input" placeholder="123">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cardName" class="form-label">Name on Card *</label>
+                                <input type="text" id="cardName" name="cardName" class="form-input" placeholder="John Doe">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Notes -->
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Order Notes (Optional)
+                        </h2>
+
+                        <div class="form-group">
+                            <label for="orderNotes" class="form-label">Special instructions for your order</label>
+                            <textarea id="orderNotes" name="orderNotes" class="form-input" rows="3" placeholder="Any special delivery instructions or notes about your order..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <h2 class="summary-title">Order Summary</h2>
+
+                <div class="order-items">
+                    <% if (products && products.length > 0) { %>
+                        <% products.forEach(product => { %>
+                            <div class="order-item">
+                                <div class="item-image">
+                                    <% if (product.imageUrl) { %>
+                                        <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
+                                    <% } else { %>
+                                        <div class="no-image">No Image</div>
+                                    <% } %>
+                                </div>
+                                <div class="item-details">
+                                    <div class="item-name"><%= product.title %></div>
+                                    <div class="item-quantity">Qty: <%= product.cartItem.quantity %></div>
+                                </div>
+                                <div class="item-price">$<%= (product.price * product.cartItem.quantity).toFixed(2) %></div>
+                            </div>
+                        <% }); %>
+                    <% } %>
+                </div>
+
+                <div class="summary-calculations">
+                    <div class="calc-row">
+                        <span class="calc-label">Subtotal (<%= products ? calculateTotalItems(products) : 0 %> items):</span>
+                        <span class="calc-value">$<%= products ? calculateTotal(products) : '0.00' %></span>
+                    </div>
+                    <div class="calc-row">
+                        <span class="calc-label">Shipping:</span>
+                        <span class="calc-value">Free</span>
+                    </div>
+                    <div class="calc-row">
+                        <span class="calc-label">Tax:</span>
+                        <span class="calc-value">$0.00</span>
+                    </div>
+                    <div class="calc-row total">
+                        <span class="calc-label">Total:</span>
+                        <span class="calc-value">$<%= products ? calculateTotal(products) : '0.00' %></span>
+                    </div>
+                </div>
+
+                <div class="checkout-actions">
+                    <a href="/cart" class="btn btn-secondary">
+                        <svg style="width: 16px; height: 16px; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Back to Cart
+                    </a>
+                    <button type="submit" form="checkout-form" class="btn btn-primary" id="place-order-btn">
+                        <svg style="width: 16px; height: 16px; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Place Order
+                    </button>
+                </div>
+
+                <div class="security-badges">
+                    <div class="security-badge">
+                        <svg class="security-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        SSL Secured
+                    </div>
+                    <div class="security-badge">
+                        <svg class="security-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        Protected
+                    </div>
+                    <div class="security-badge">
+                        <svg class="security-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
+                            <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+                        </svg>
+                        Safe Payments
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Toggle billing address visibility
+        document.getElementById('sameAsShipping').addEventListener('change', function() {
+            const billingAddress = document.getElementById('billingAddress');
+            if (this.checked) {
+                billingAddress.style.display = 'none';
+            } else {
+                billingAddress.style.display = 'block';
+            }
+        });
+
+        // Toggle payment method fields
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Update visual selection
+                document.querySelectorAll('.payment-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                this.closest('.payment-option').classList.add('selected');
+
+                // Show/hide credit card fields
+                const creditCardFields = document.getElementById('creditCardFields');
+                if (this.value === 'credit_card') {
+                    creditCardFields.style.display = 'block';
+                    // Make credit card fields required
+                    document.getElementById('cardNumber').required = true;
+                    document.getElementById('expiryDate').required = true;
+                    document.getElementById('cvv').required = true;
+                    document.getElementById('cardName').required = true;
+                } else {
+                    creditCardFields.style.display = 'none';
+                    // Remove required attribute from credit card fields
+                    document.getElementById('cardNumber').required = false;
+                    document.getElementById('expiryDate').required = false;
+                    document.getElementById('cvv').required = false;
+                    document.getElementById('cardName').required = false;
+                }
+            });
+        });
+
+        // Form validation and submission with loading state
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('place-order-btn');
+
+            // Basic form validation
+            const requiredFields = this.querySelectorAll('input[required], select[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.style.borderColor = '#ef4444';
+                    isValid = false;
+                } else {
+                    field.style.borderColor = '#e2e8f0';
+                }
+            });
+
+            // Email validation
+            const email = document.getElementById('email');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email.value && !emailRegex.test(email.value)) {
+                email.style.borderColor = '#ef4444';
+                isValid = false;
+            }
+
+            // Phone validation (basic)
+            const phone = document.getElementById('phone');
+            const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+            if (phone.value && !phoneRegex.test(phone.value.replace(/[\s\-\(\)]/g, ''))) {
+                phone.style.borderColor = '#ef4444';
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields correctly.');
+                return;
+            }
+
+            // Show loading state
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            // Show confirmation before submitting
+            if (!confirm('Are you sure you want to place this order?')) {
+                e.preventDefault();
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+                return;
+            }
+        });
+
+        // Format card number input
+        document.getElementById('cardNumber')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+            if (value.length > 19) value = value.substring(0, 19);
+            e.target.value = value;
+        });
+
+        // Format expiry date input
+        document.getElementById('expiryDate')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // CVV input (numbers only, max 4 digits)
+        document.getElementById('cvv')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 4) value = value.substring(0, 4);
+            e.target.value = value;
+        });
+
+        // Phone number formatting
+        document.getElementById('phone')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 6) {
+                value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            } else if (value.length >= 3) {
+                value = value.replace(/(\d{3})(\d{0,3})/, '($1) $2');
+            }
+            e.target.value = value;
+        });
+
+        // Auto-fill billing from shipping when checkbox is checked
+        document.getElementById('sameAsShipping').addEventListener('change', function() {
+            if (this.checked) {
+                // Copy shipping info to billing (if billing fields exist)
+                const billingFirstName = document.getElementById('billingFirstName');
+                const billingLastName = document.getElementById('billingLastName');
+
+                if (billingFirstName) billingFirstName.value = document.getElementById('firstName').value;
+                if (billingLastName) billingLastName.value = document.getElementById('lastName').value;
+            }
+        });
+
+        // Real-time validation feedback
+        document.querySelectorAll('.form-input, .form-select').forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.required && !this.value.trim()) {
+                    this.style.borderColor = '#ef4444';
+                } else {
+                    this.style.borderColor = '#e2e8f0';
+                }
+            });
+
+            input.addEventListener('focus', function() {
+                this.style.borderColor = '#667eea';
+            });
+        });
+    </script>
+
+<%- include('../includes/end.ejs') %>

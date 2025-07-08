@@ -9,7 +9,7 @@
         </div>
 
         <!-- Mobile Menu Toggle -->
-        <button class="mobile-toggle" onclick="toggleMobileMenu()">
+        <button class="mobile-toggle" id="mobile-toggle-btn" onclick="toggleMobileMenu()">
             <span></span>
             <span></span>
             <span></span>
@@ -37,14 +37,14 @@
                         <span class="cart-badge">0</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link <%= path === '/orders' ? 'active' : '' %>" href="/orders">
                         <span class="nav-icon">📋</span>
                         <span class="nav-text">Orders</span>
                     </a>
-                </li>
-                                <li class="nav-item dropdown">
-                    <a class="nav-link <%= path.includes('/admin') ? 'active' : '' %>" href="#" onclick="toggleDropdown(event)">
+                </li> -->
+                <li class="nav-item dropdown" onclick="toggleDropdown(event)">
+                    <a class="nav-link <%= path.includes('/admin') ? 'active' : '' %>" href="#" id="admin-dropdown-toggle">
                         <span class="nav-icon">⚙️</span>
                         <span class="nav-text">Admin</span>
                         <span class="dropdown-arrow">▼</span>
@@ -86,33 +86,4 @@
     </div>
 </header>
 
-<script>
-function toggleMobileMenu() {
-    const nav = document.querySelector('.elegant-nav');
-    const toggle = document.querySelector('.mobile-toggle');
-    nav.classList.toggle('mobile-open');
-    toggle.classList.toggle('open');
-}
-
-function toggleDropdown(event) {
-    event.preventDefault();
-    const dropdown = event.currentTarget.parentElement;
-    dropdown.classList.toggle('open');
-
-    // Close other dropdowns
-    document.querySelectorAll('.dropdown.open').forEach(item => {
-        if (item !== dropdown) {
-            item.classList.remove('open');
-        }
-    });
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(event) {
-    if (!event.target.closest('.dropdown')) {
-        document.querySelectorAll('.dropdown.open').forEach(item => {
-            item.classList.remove('open');
-        });
-    }
-});
-</script>
+<script src="/js/navigation.js"></script>

@@ -253,9 +253,117 @@ exports.getOrders = (req, res, next) => {
       res.status(500).send('Internal Server Error');
   });
 }
-// exports.getCheckout = (req, res, next) => {
-//   res.render('shop/checkout', {
-//     path: '/checkout',
-//     pageTitle: 'Checkout'
-//   });
-// }
+
+exports.getCheckout = (req, res, next) => {
+  if (!req.user) {
+    return res.redirect('/login');
+  }
+
+  req.user.getCart()
+    .then(cart => {
+      return cart.getProducts();
+    })
+    .then(products => {
+      if (!products || products.length === 0) {
+        return res.redirect('/cart');
+      }
+
+      res.render('shop/checkout', {
+        path: '/checkout',
+        pageTitle: 'Checkout',
+        products: products
+      });
+    })
+    .catch(err => {
+      console.error('Error fetching cart for checkout:', err);
+      res.status(500).send('Internal Server Error');
+    });
+}
+
+exports.postPlaceOrder = (req, res, next) => {
+  if (!req.user) {
+    return res.redirect('/login');
+  }
+
+  const {
+    firstName,
+    lastName,
+    email,
+    phone,
+    address,
+    apartment,
+    city,
+    state,
+    zipCode,
+    country,
+    paymentMethod,
+    orderNotes
+  } = req.body;
+
+  let fetchedCart;
+  let cartProducts;
+
+  req.user.getCart()
+    .then(cart => {
+      fetchedCart = cart;
+      return cart.getProducts();
+    })
+    .then(products => {
+      cartProducts = products;
+      if (!cartProducts || cartProducts.length === 0) {
+        return res.redirect('/cart');
+      }
+
+      return req.user.createOrder()
+        .then(order => {
+          // Store shipping and payment information with the order
+          // In a real application, you would save this to a separate table
+          const orderData = {
+            shippingAddress: {
+              firstName,
+              lastName,
+              email,
+              phone,
+              address,
+              apartment,
+              city,
+              state,
+              zipCode,
+              country
+            },
+            paymentMethod,
+            orderNotes
+          };
+
+          // For now, we'll just log this information
+          console.log('Order details:', orderData);
+
+          return order.addProducts(
+            cartProducts.map(product => {
+              product.orderItem = { quantity: product.cartItem.quantity };
+              return product;
+            })
+          );
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    })
+    .then(result => {
+      if (cartProducts && cartProducts.length > 0) {
+        return fetchedCart.setProducts(null)
+          .then(() => {
+            console.log('Order placed successfully');
+            console.log('Cart cleared');
+            return res.redirect('/orders');
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).send('Error placing order');
+    });
+}
