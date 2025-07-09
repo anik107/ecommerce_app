@@ -46,6 +46,7 @@
             <!-- Checkout Form -->
             <div class="checkout-form">
                 <form action="/place-order" method="POST" id="checkout-form">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <!-- Shipping Information -->
                     <div class="form-section">
                         <h2 class="section-title">

@@ -34,16 +34,19 @@
                             <div class="product-actions">
                                 <div class="quantity-controls">
                                     <form action="/cart-decrease-item" method="POST" style="display: inline;">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                         <input type="hidden" name="productId" value="<%= p.id %>">
                                         <button type="submit" class="btn btn-qty">-</button>
                                     </form>
                                     <span class="qty-display"><%= p.cartItem.quantity %></span>
                                     <form action="/cart-increase-item" method="POST" style="display: inline;">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                         <input type="hidden" name="productId" value="<%= p.id %>">
                                         <button type="submit" class="btn btn-qty">+</button>
                                     </form>
                                 </div>
                                 <form action="/cart-delete-item" method="POST">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                     <input type="hidden" name="productId" value="<%= p.id %>">
                                     <button type="submit" class="btn btn-remove">Remove</button>
                                 </form>

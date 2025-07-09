@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
+const csrf = require('csurf');
 
 // Import configurations
 const appConfig = require('./config/app');
@@ -34,6 +35,8 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
+const csrfProtection = csrf();
+
 // Setup security middleware
 setupSecurity(app);
 
@@ -51,6 +54,12 @@ app.use(session({
     ...appConfig.session,
     store: sessionStore
 }));
+
+// Body parser middleware (moved here to be before CSRF)
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
+app.use(csrfProtection);
 
 // Authentication middleware
 app.use((req, res, next) => {
@@ -77,6 +86,12 @@ app.use((req, res, next) => {
             logger.error('User fetch error:', err);
             next(err);
         });
+});
+
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
 });
 
 // Routes

@@ -46,6 +46,7 @@
 
                     <!-- Signup Form -->
                     <form class="signup-form" action="/signup" method="POST" novalidate>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <!-- Full Name -->
                         <div class="form-group">
                             <label for="fullName" class="form-label">Full Name</label>

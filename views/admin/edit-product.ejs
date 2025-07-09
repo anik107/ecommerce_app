@@ -53,6 +53,7 @@
 
             <!-- Main Form -->
             <form class="enhanced-product-form" action="<% if (editing) { %>/admin/edit-product<% } else { %>/admin/add-product<% } %>" method="POST" id="productForm">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div class="form-sections">
                     <!-- Main Content Section -->
                     <div class="form-main-content">

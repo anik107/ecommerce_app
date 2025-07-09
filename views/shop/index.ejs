@@ -71,6 +71,7 @@
                                     <div class="featured-product-actions">
                                          <% if (isAuthenticated) { %>
                                             <form action="/cart" method="POST" style="flex: 2;">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                                 <button type="submit" class="btn-featured-cart">
                                                     🛒 Add to Cart
                                                 </button>

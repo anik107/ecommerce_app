@@ -5,7 +5,7 @@ exports.get404 = (req, res, next) => {
     res.status(404).render('404', {
         pageTitle: 'Page Not Found',
         path: req.url,
-        isAuthenticated: req.session.isLoggedIn
+        isAuthenticated: req.session.isLoggedIn,
     });
 };
 
@@ -16,6 +16,6 @@ exports.get500 = (req, res, next) => {
         msg: 'Something went wrong on our end. Please try again later.',
         pageTitle: 'Error',
         path: '/error',
-        isAuthenticated: req.session.isLoggedIn
+        isAuthenticated: req.session.isLoggedIn,
     });
 };

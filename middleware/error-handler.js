@@ -28,6 +28,10 @@ const handleValidationErrorDB = err => {
   return new AppError(message, 400);
 };
 
+const handleCSRFError = err => {
+  return new AppError('Invalid CSRF token. Please refresh the page and try again.', 403);
+};
+
 const sendErrorDev = (err, req, res) => {
   // A) API
   if (req.originalUrl.startsWith('/api')) {
@@ -107,6 +111,7 @@ const globalErrorHandler = (err, req, res, next) => {
     if (error.name === 'CastError') error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDuplicateFieldsDB(error);
     if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
+    if (error.code === 'EBADCSRFTOKEN') error = handleCSRFError(error);
 
     sendErrorProd(error, req, res);
   }

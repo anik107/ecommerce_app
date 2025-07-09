@@ -68,6 +68,9 @@
                 <li class="nav-item">
                     <form action="/logout" method="POST" style="display: inline;">
                         <button type="submit" class="nav-link logout-btn" style="background: none; border: none; cursor: pointer; color: inherit; font: inherit;">
+                            <% if (locals.csrfToken) { %>
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <% } %>
                             <span class="nav-icon">🚪</span>
                             <span class="nav-text">Logout</span>
                         </button>

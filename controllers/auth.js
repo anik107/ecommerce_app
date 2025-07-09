@@ -5,7 +5,7 @@ exports.getLogin = (req, res, next) => {
     res.render('auth/login', {
         path: '/login',
         pageTitle: 'Login',
-        isAuthenticated: false
+        isAuthenticated: false,
     });
 };
 
@@ -22,7 +22,8 @@ exports.getSignup = (req, res, next) => {
 exports.postLogin = async(req, res, next) => {
     const { email, password } = req.body;
     const user = await UserService.getUserByEmail(email);
-    if (!user || user.password !== password) {
+    const checkPassword = await becrypt.compare(password, user ? user.password : '');
+    if (!user || !checkPassword) {
         return res.render('auth/login', {
             path: '/login',
             pageTitle: 'Login',
